@@ -2,13 +2,13 @@ package main
 
 import (
 	"calc"
-	"log"
-	"net"
+	"io"
+	"net/http"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 )
 
-type CalcService struct {}
+type CalcService struct{}
 
 func (c *CalcService) CalcTwoNumber(request calc.Calc, reply *float64) error {
 	oper, err := CreateOperation(request.Operator)
@@ -29,19 +29,22 @@ func (c *CalcService) GetOperators(request struct{}, reply *[]string) error {
 
 func main() {
 	calc.RegisterCalcService(new(CalcService))
-	// rpc.HandleHTTP()
-	// http.ListenAndServe(":1234", nil)
 
-	listener, err := net.Listen("tcp", ":1234")
-	if err != nil {
-		log.Fatal("ListenTCP error:", err)
-	}
-
-	for	{
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Fatal("Accept error:", err)
+	http.HandleFunc("/jsonrpc", func(w http.ResponseWriter, r *http.Request) {
+		var conn io.ReadWriteCloser = struct {
+			io.Writer
+			io.ReadCloser
+		}{
+			ReadCloser: r.Body,
+			Writer:     w,
 		}
-		go rpc.ServeCodec(jsonrpc.NewServerCodec(conn))
-	}
+
+		rpc.ServeRequest(jsonrpc.NewServerCodec(conn))
+	})
+
+	http.ListenAndServe(":1234", nil)
+
+	// 使用 curl 模拟调用
+	// curl localhost:1234/jsonrpc -X POST \
+	// --data '{"method":"CalcService.GetOperators","params":[{}],"id":0}'
 }
