@@ -45,6 +45,10 @@ func main() {
 	http.ListenAndServe(":1234", nil)
 
 	// 使用 curl 模拟调用
+	// 
 	// curl localhost:1234/jsonrpc -X POST \
 	// --data '{"method":"CalcService.GetOperators","params":[{}],"id":0}'
+	// 
+	// curl localhost:1234/jsonrpc -X POST \
+	// --data '{"method":"CalcService.CalcTwoNumber","params":[{"Number1":5,"Number2":2,"Operator":"/"}],"id":0}'
 }

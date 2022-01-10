@@ -11,12 +11,12 @@ func main() {
 		log.Fatal("Err Dial Client:", err)
 	}
 
-	var opers []string
-	err = client.GetOperators(struct{}{}, &opers)
-	if err != nil {
-		log.Println("Err Get Operators:", err)
-	}
-	log.Println(opers)
+	// var opers []string
+	// err = client.GetOperators(struct{}{}, &opers)
+	// if err != nil {
+	// 	log.Println("Err Get Operators:", err)
+	// }
+	// log.Println(opers)
 
 	testAdd := calc.Calc{
 		Number1:  5,
