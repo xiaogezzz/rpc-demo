@@ -1,10 +1,14 @@
 package calc
 
-import "net/rpc"
+import (
+	"net"
+	"net/rpc"
+	"net/rpc/jsonrpc"
+)
 
 type Calc struct {
-	Number1 float64
-	Number2 float64
+	Number1  float64
+	Number2  float64
 	Operator string
 }
 
@@ -12,9 +16,9 @@ const ServiceName = "CalcService"
 
 type ServiceInterface interface {
 	// CalcTwoNumber 对两个数进行运算
-	CalcTwoNumber(request Calc, reply *float64)  error
+	CalcTwoNumber(request Calc, reply *float64) error
 	// GetOperators 获取所有支持的运算
-	GetOperators(request struct{}, reply *[]string)  error
+	GetOperators(request struct{}, reply *[]string) error
 }
 
 func RegisterCalcService(svc ServiceInterface) error {
@@ -28,11 +32,13 @@ type CalcClient struct {
 var _ ServiceInterface = (*CalcClient)(nil)
 
 func DialCalcService(network, address string) (*CalcClient, error) {
-	c, err := rpc.Dial(network, address)
+	conn, err := net.Dial(network, address)
 	if err != nil {
 		return nil, err
 	}
-	return &CalcClient{c}, nil
+	return &CalcClient{
+		rpc.NewClientWithCodec(jsonrpc.NewClientCodec(conn)),
+	}, nil
 }
 
 func (c *CalcClient) CalcTwoNumber(request Calc, reply *float64) error {

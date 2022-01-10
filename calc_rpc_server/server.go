@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/rpc"
+	"net/rpc/jsonrpc"
 )
 
 type CalcService struct {}
@@ -41,6 +42,6 @@ func main() {
 		if err != nil {
 			log.Fatal("Accept error:", err)
 		}
-		go rpc.ServeConn(conn)
+		go rpc.ServeCodec(jsonrpc.NewServerCodec(conn))
 	}
 }
